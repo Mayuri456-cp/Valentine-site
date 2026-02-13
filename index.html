@@ -4,8 +4,6 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Will you be my Valentine?</title>
-
-  <!-- Google Font -->
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 
   <style>
@@ -29,8 +27,6 @@
       background: linear-gradient(135deg, var(--bg1), var(--bg2));
       color: #3b1b2b;
     }
-
-    /* Subtle animated floating hearts background */
     .bg-hearts{
       position: fixed;
       inset: 0;
@@ -63,8 +59,6 @@
       from { transform: translateY(0) scale(.8); opacity: .18; }
       to   { transform: translateY(-120vh) scale(1.05); opacity: 0; }
     }
-
-    /* Main container */
     .wrap{
       min-height:100vh;
       display:flex;
@@ -103,9 +97,8 @@
       margin-left:auto;
       margin-right:auto;
     }
-
-    /* Buttons area */
-    .actions{
+/*Buttons placements */
+      .actions{
       display:flex;
       gap:18px;
       justify-content:center;
@@ -137,7 +130,7 @@
       outline-offset: 4px;
     }
 
-    /* No button starts normal */
+    
     .btn--no{
       background: #fff8fb;
       color: var(--accent-dark);
@@ -145,15 +138,12 @@
     }
     .btn--no[aria-hidden="true"]{ pointer-events:none; }
 
-    /* small caption */
     .note{
       margin-top: 18px;
       font-size: 13px;
       color: #7a3d53;
       opacity: 0.9;
     }
-
-    /* Confetti/hearts burst */
     .burst{
       position:absolute;
       inset:0;
@@ -161,8 +151,6 @@
       overflow:visible;
       z-index:3;
     }
-
-    /* Modal / success panel */
     .modal{
       position: fixed;
       inset: 0;
@@ -190,8 +178,6 @@
       font-size: 28px;
     }
     .modal-card p{ margin: 0 0 16px 0; color: #5b2a3e; }
-
-    /* small friendly footer */
     .credit{
       margin-top:14px;
       font-size:12px;
@@ -199,12 +185,10 @@
       opacity:0.9;
     }
 
-    /* Keep no-button jumps smooth */
+    /* NO button moving around */
     .btn--no.moving{
       transition: transform .28s cubic-bezier(.2,.9,.3,1), opacity .12s linear;
     }
-
-    /* small responsive tweaks */
     @media (max-width:520px){
       .actions{ gap:12px; }
       .card{ padding: 20px; border-radius:16px; }
@@ -243,12 +227,10 @@
   </div>
 
   <script>
-    // ---------- Utilities ----------
+ 
     const rand = (min, max) => Math.random() * (max - min) + min;
-
-    // ---------- Heart background setup ----------
     const heartsContainer = document.getElementById('hearts-container');
-    // create many hearts with random timing
+
     for(let i=0;i<14;i++){
       const h = document.createElement('div');
       h.className = 'heart';
@@ -264,7 +246,7 @@
       heartsContainer.appendChild(h);
     }
 
-    // ---------- Core interactive behavior ----------
+    
     const yesBtn = document.getElementById('yesBtn');
     const noBtn = document.getElementById('noBtn');
     const actions = document.getElementById('actions');
@@ -272,44 +254,40 @@
     const closeModal = document.getElementById('closeModal');
     const burst = document.getElementById('burst');
 
-    // keep track of container for bounding
     const card = document.querySelector('.card');
 
-    // function to get bounding rect of card (viewport coords)
     function getCardRect(){
       return card.getBoundingClientRect();
     }
-
-    // Return a random valid position for noBtn inside card
     function chooseNewNoPosition(){
       const cardRect = getCardRect();
       const actionsRect = actions.getBoundingClientRect();
       const yesRect = yesBtn.getBoundingClientRect();
 
-      // Size of the "No" button (we will position via transform: translate)
+      
       const noRect = noBtn.getBoundingClientRect();
       const btnW = noRect.width;
       const btnH = noRect.height;
 
-      // Allowed area padding
-      const padding = 12; // px inside the card
+    
+      const padding = 12; 
       const leftLimit = cardRect.left + padding;
       const rightLimit = cardRect.right - padding - btnW;
-      const topLimit = cardRect.top + padding + 40;   // leave space for heading
+      const topLimit = cardRect.top + padding + 40;  
       const bottomLimit = cardRect.bottom - padding - btnH - 10;
 
-      // fallback if card is small:
+     
       const minLeft = Math.min(leftLimit, rightLimit);
       const minTop = Math.min(topLimit, bottomLimit);
 
       let newLeft = rand(minLeft, Math.max(minLeft, rightLimit));
       let newTop  = rand(minTop, Math.max(minTop, bottomLimit));
 
-      // ensure the no-button doesn't appear too close to the 'Yes' button
+      
       const yesCenterX = yesRect.left + yesRect.width/2;
       const yesCenterY = yesRect.top + yesRect.height/2;
 
-      // compute candidate center
+     
       let tries = 0;
       while(tries < 14){
         const candCenterX = newLeft + btnW/2;
@@ -320,14 +298,12 @@
         if(dist > Math.max(120, Math.min(cardRect.width, cardRect.height)*0.25)){
           break;
         }
-        // pick again
+       
         newLeft = rand(minLeft, Math.max(minLeft, rightLimit));
         newTop  = rand(minTop, Math.max(minTop, bottomLimit));
         tries++;
       }
 
-      // choose relative coordinates inside the actions parent (so transform can be applied)
-      // We'll compute offsets relative to actions container (so that layout continues working)
       const actionsRect2 = actions.getBoundingClientRect();
       const offsetX = newLeft - actionsRect2.left;
       const offsetY = newTop - actionsRect2.top;
@@ -335,30 +311,30 @@
       return {x: offsetX, y: offsetY};
     }
 
-    // Move the "No" button with a playful animation
+    
     let moving = false;
     function moveNoButton(){
-      if(moving) return; // throttle
+      if(moving) return; 
       moving = true;
       noBtn.classList.add('moving');
-      // temporarily disable pointer events while moving
+     
       noBtn.setAttribute('aria-hidden', 'true');
       noBtn.style.pointerEvents = 'none';
 
-      // small fade-out -> reposition -> fade-in
+    
       noBtn.style.transition = 'opacity .12s linear, transform .28s cubic-bezier(.2,.9,.3,1)';
       noBtn.style.opacity = '0.08';
 
-      // after fade-out, reposition
+      
       setTimeout(()=>{
         const pos = chooseNewNoPosition();
-        // apply transform in pixels: translate(x,y)
+       
         noBtn.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
-        // quick pop scale
+       
         noBtn.style.opacity = '1';
       }, 140);
 
-      // re-enable after animation
+     
       setTimeout(()=>{
         noBtn.setAttribute('aria-hidden', 'false');
         noBtn.style.pointerEvents = '';
@@ -367,56 +343,54 @@
       }, 520);
     }
 
-    // Ensure initial layout places the noBtn at a pleasant starting spot (beside Yes)
+    
     function placeNoAtStart(){
-      // remove any transform first for a stable measure
+     
       noBtn.style.transform = 'translate(0px, 0px)';
-      // Compute a slightly offset position to the right of Yes if possible
+     
       const actionsRect = actions.getBoundingClientRect();
       const yesRect = yesBtn.getBoundingClientRect();
       const noRect = noBtn.getBoundingClientRect();
 
-      // default after Yes: 24px gap
+     
       const desiredX = (yesRect.right - actionsRect.left) + 18;
       const desiredY = yesRect.top - actionsRect.top - (noRect.height - yesRect.height)/2;
 
       noBtn.style.transform = `translate(${Math.max(8, desiredX)}px, ${Math.max(-10, desiredY)}px)`;
     }
 
-    // Attach hover and touch handlers
-    // For desktop: mouseenter triggers move. For mobile: touchstart triggers move immediately.
+ 
     noBtn.addEventListener('mouseenter', (e)=>{
       moveNoButton();
     });
     noBtn.addEventListener('focus', (e)=>{
-      // keyboard focus should also cause it to move away
+    
       moveNoButton();
-      yesBtn.focus(); // move focus back to yes to keep keyboard accessible
+      yesBtn.focus(); 
     });
     noBtn.addEventListener('touchstart', (e)=>{
-      // on touch, stop default to avoid click; move and prevent tapping
+      
       e.preventDefault();
       moveNoButton();
     }, {passive:false});
 
-    // Extra trick: if the user tries to click, block it and move again
+    
     noBtn.addEventListener('click', (e)=>{
       e.preventDefault();
       moveNoButton();
     });
 
-    // Rebalance positions in case of resize
+    
     window.addEventListener('resize', () => {
       placeNoAtStart();
     });
 
-    // If user moves mouse quickly to the No button (very determined), also nudge it on mousemove near it
+    
     document.addEventListener('mousemove', (e)=>{
       const rect = noBtn.getBoundingClientRect();
       const mx = e.clientX;
       const my = e.clientY;
 
-      // if mouse within 60px of center, move it
       const cx = rect.left + rect.width/2;
       const cy = rect.top + rect.height/2;
       const dx = mx - cx, dy = my - cy;
@@ -426,17 +400,17 @@
       }
     });
 
-    // ---------- Yes button behavior ----------
+   
     yesBtn.addEventListener('click', async (e)=>{
-      // small heart/confetti burst and show modal
+      
       playBurst(e.clientX, e.clientY);
       showModal();
     });
 
-    // create a burst of little hearts at a given point
+  
     function playBurst(x = null, y = null){
       const rect = card.getBoundingClientRect();
-      // if coordinates not provided, center on yes button
+      
       if(!x || !y){
         const yesRect = yesBtn.getBoundingClientRect();
         x = yesRect.left + yesRect.width/2;
@@ -460,7 +434,7 @@
         burst.appendChild(p);
         particles.push(p);
       }
-      // animate particles outward and fade
+     
       setTimeout(()=>{
         particles.forEach((p, idx)=>{
           const angle = rand(0, Math.PI*2);
@@ -471,19 +445,19 @@
           p.style.opacity = 0;
         });
       }, 40);
-      // remove after animation
+     
       setTimeout(()=> particles.forEach(p => p.remove()), 1400);
     }
 
-    // Show modal and confetti
+    
     function showModal(){
       modal.classList.add('show');
       modal.setAttribute('aria-hidden', 'false');
-      // quick hearts burst from yes button
+      
       const yesRect = yesBtn.getBoundingClientRect();
       playBurst(yesRect.left + yesRect.width/2, yesRect.top + yesRect.height/2);
 
-      // small continuous soft heart rain for extra bliss
+    
       launchSoftHearts();
     }
 
@@ -492,7 +466,6 @@
       modal.setAttribute('aria-hidden', 'true');
     });
 
-    // Close modal when clicking outside modal-card
     modal.addEventListener('click', (ev)=>{
       if(ev.target === modal){
         modal.classList.remove('show');
@@ -500,7 +473,6 @@
       }
     });
 
-    // Some soft heart particles for ambience when modal opens
     let softHeartsTimer = null;
     function launchSoftHearts(){
       clearInterval(softHeartsTimer);
@@ -527,8 +499,7 @@
       }, 160);
     }
 
-    // ---------- Accessibility helpers ----------
-    // Keyboard support: pressing Enter or Space when Yes is focused triggers it.
+   
     yesBtn.addEventListener('keydown', (e) => {
       if(e.key === 'Enter' || e.key === ' '){
         e.preventDefault();
@@ -536,17 +507,16 @@
       }
     });
 
-    // Place No at start nicely once fonts and layout settle
+    
     window.addEventListener('load', () => {
-      // ensure initial subtle placement
+      
       placeNoAtStart();
 
-      // small playful move to show it's alive
+     
       setTimeout(()=> moveNoButton(), 1100);
       setTimeout(()=> moveNoButton(), 2300);
     });
 
-    // Ensure that if someone tries to cheat with keyboard navigation to No, the no button keeps moving away
     noBtn.addEventListener('keydown', (e)=>{
       if(['Enter',' '].includes(e.key)){
         e.preventDefault();
@@ -554,10 +524,9 @@
       }
     });
 
-    // Finally: keep No button unreachable if window is very small by making it a bit more shy
+    
     const checkSmall = () => {
       if(window.innerWidth < 420){
-        // on tiny screens make it move a little less violently but still dodge taps
         noBtn.addEventListener('touchstart', (e)=> {
           e.preventDefault();
           moveNoButton();
